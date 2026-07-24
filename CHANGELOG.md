@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.5.0...v1.6.0) (2026-07-24)
+
+
+### Features
+
+* --compact shows one-liner per workspace (407 → 49 lines) ([e12393a](https://github.com/jeziellopes/vscdb-fix/commit/e12393a7843db59a3009adbefcbd4109ccb10a6d))
+
 # [1.5.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.4.1...v1.5.0) (2026-07-24)
 
 
