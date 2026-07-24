@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/jeziellopes/vscdb-fix/compare/v1.8.0...v1.8.1) (2026-07-24)
+
+
+### Bug Fixes
+
+* **compact:** add trailing blank line after summary ([3076116](https://github.com/jeziellopes/vscdb-fix/commit/3076116a8f6a4f3e8d22575543170b8e14b31895))
+
 # [1.8.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.7.1...v1.8.0) (2026-07-24)
 
 
