@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.6.0...v1.7.0) (2026-07-24)
+
+
+### Features
+
+* **compact:** dynamic column padding, project name, short ID ([e197ead](https://github.com/jeziellopes/vscdb-fix/commit/e197ead87f9d0aa6ffbaaf2b991fcaae75515e2c))
+
 # [1.6.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.5.0...v1.6.0) (2026-07-24)
 
 
