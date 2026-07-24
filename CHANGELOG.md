@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.4.1...v1.5.0) (2026-07-24)
+
+
+### Features
+
+* add --compact flag and padding to banner ([80fa044](https://github.com/jeziellopes/vscdb-fix/commit/80fa04459b442c557679c17186e213fbbffe3d68))
+
 ## [1.4.1](https://github.com/jeziellopes/vscdb-fix/compare/v1.4.0...v1.4.1) (2026-07-24)
 
 
