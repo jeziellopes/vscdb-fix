@@ -1556,6 +1556,21 @@ def merge_workspaces_mode(dry_run: bool = False, auto_yes: bool = False) -> int:
     return 0
 
 
+def _show_banner():
+    """Print figlet-style banner if pyfiglet is installed, else simple header."""
+    try:
+        import pyfiglet
+        banner = pyfiglet.figlet_format("VSCDB-FIX", font="slant")
+        print(banner)
+        print("  Repair corrupted chat session indices in VS Code")
+        print()
+    except ImportError:
+        print("=" * 50)
+        print("  vscdb-fix — VS Code Chat History Repair")
+        print("=" * 50)
+        print()
+
+
 def main():
     global _use_insiders
 
@@ -1621,6 +1636,8 @@ def main():
 
     args = parser.parse_args()
     _use_insiders = args.insiders
+
+    _show_banner()
 
     # List mode
     if args.list:

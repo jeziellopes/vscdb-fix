@@ -51,6 +51,13 @@ vscdb-fix --dry-run    # preview
 vscdb-fix              # fix (close VS Code first!)
 ```
 
+With banner support:
+
+```bash
+pip install ".[cli]"
+vscdb-fix
+```
+
 Or run directly without installing:
 
 ```bash
