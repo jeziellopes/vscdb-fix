@@ -123,6 +123,8 @@ def extract_project_name(folder_path: Optional[str]) -> Optional[str]:
 
 # Global flag for VS Code Insiders mode
 _use_insiders = False
+# Global flag for compact output
+_compact = False
 
 def get_vscode_storage_root() -> Path:
     """Get the VS Code workspace storage directory for the current platform.
@@ -1558,6 +1560,8 @@ def merge_workspaces_mode(dry_run: bool = False, auto_yes: bool = False) -> int:
 
 def _show_banner():
     """Print figlet-style banner using figlet.js (ANSI Shadow font) in VS Code blue."""
+    if "--compact" in sys.argv:
+        return
     try:
         import subprocess
         result = subprocess.run(
@@ -1567,6 +1571,7 @@ def _show_banner():
         if result.returncode == 0 and result.stdout.strip():
             blue = "\033[38;5;33m"
             reset = "\033[0m"
+            print()
             for line in result.stdout.splitlines():
                 print(f"{blue}{line}{reset}")
             print(f"{blue}  Repair corrupted chat session indices in VS Code{reset}")
@@ -1642,11 +1647,17 @@ def main():
         action="store_true",
         help="Use VS Code Insiders storage instead of regular VS Code",
     )
+    parser.add_argument(
+        "--compact",
+        action="store_true",
+        help="Minimal output (no banner, fewer blank lines)",
+    )
 
     _show_banner()
 
     args = parser.parse_args()
     _use_insiders = args.insiders
+    _compact = args.compact
     dry_run = not args.apply
 
     # List mode
