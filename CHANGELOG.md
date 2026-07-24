@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.3.0...v1.4.0) (2026-07-24)
+
+
+### Features
+
+* dry-run is now the default, use --apply to actually repair ([10d0a58](https://github.com/jeziellopes/vscdb-fix/commit/10d0a58e63221478e07333a1f5406f5039a4e10d))
+
 # [1.3.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.2.0...v1.3.0) (2026-07-24)
 
 
