@@ -1557,7 +1557,7 @@ def merge_workspaces_mode(dry_run: bool = False, auto_yes: bool = False) -> int:
 
 
 def _show_banner():
-    """Print figlet-style banner using figlet.js (Coder Mini font)."""
+    """Print figlet-style banner using figlet.js (ANSI Shadow font) in VS Code blue."""
     try:
         import subprocess
         result = subprocess.run(
@@ -1565,13 +1565,15 @@ def _show_banner():
             capture_output=True, text=True, timeout=30,
         )
         if result.returncode == 0 and result.stdout.strip():
-            print(result.stdout)
-            print("  Repair corrupted chat session indices in VS Code")
+            blue = "\033[38;5;33m"
+            reset = "\033[0m"
+            for line in result.stdout.splitlines():
+                print(f"{blue}{line}{reset}")
+            print(f"{blue}  Repair corrupted chat session indices in VS Code{reset}")
             print()
             return
     except (FileNotFoundError, subprocess.TimeoutExpired):
         pass
-    # Fallback if node/figlet not available
     print("=" * 50)
     print("  vscdb-fix — VS Code Chat History Repair")
     print("=" * 50)
@@ -1641,11 +1643,11 @@ def main():
         help="Use VS Code Insiders storage instead of regular VS Code",
     )
 
+    _show_banner()
+
     args = parser.parse_args()
     _use_insiders = args.insiders
     dry_run = not args.apply
-
-    _show_banner()
 
     # List mode
     if args.list:
