@@ -121,10 +121,19 @@ def extract_project_name(folder_path: Optional[str]) -> Optional[str]:
     except:
         return None
 
+
+def _redact_name(name: str) -> str:
+    """Redact a project name for safe sharing."""
+    import hashlib
+    h = hashlib.md5(name.encode()).hexdigest()[:6]
+    return f"project-{h}"
+
 # Global flag for VS Code Insiders mode
 _use_insiders = False
 # Global flag for compact output
 _compact = False
+# Global flag for redacted output
+_redacted = False
 
 def get_vscode_storage_root() -> Path:
     """Get the VS Code workspace storage directory for the current platform.
@@ -813,6 +822,8 @@ def list_workspaces_mode(show_all: bool = False):
             if ws.orphaned_in_index:
                 issues.append(f"orphans:{len(ws.orphaned_in_index)}")
             name = extract_project_name(ws.folder or ws.workspace_file) or ws.id[:8]
+            if _redacted:
+                name = _redact_name(name)
             short_id = ws.id[:8]
             issues_str = f" ⚠️  {', '.join(issues)}" if issues else ""
             sessions_str = f"{len(ws.sessions_on_disk)} sessions"
@@ -1615,7 +1626,7 @@ def _show_banner():
 
 
 def main():
-    global _use_insiders, _compact
+    global _use_insiders, _compact, _redacted
 
     import argparse
 
@@ -1681,12 +1692,18 @@ def main():
         action="store_true",
         help="Minimal output (no banner, fewer blank lines)",
     )
+    parser.add_argument(
+        "--redacted",
+        action="store_true",
+        help="Redact project names for safe sharing",
+    )
 
     _show_banner()
 
     args = parser.parse_args()
     _use_insiders = args.insiders
     _compact = args.compact
+    _redacted = args.redacted
     dry_run = not args.apply
 
     # List mode
