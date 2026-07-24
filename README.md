@@ -1,6 +1,12 @@
 
 # vscdb-fix
 
+```
+▖▖▄▖▄▖▄ ▄   ▄▖▄▖▖▖
+▌▌▚ ▌ ▌▌▙▘▄▖▙▖▐ ▚▘
+▚▘▄▌▙▖▙▘▙▘  ▌ ▟▖▌▌
+```
+
 A utility to repair corrupted chat session indices in VS Code workspace storage databases (`state.vscdb`).
 
 > **Problem:** VS Code chat sessions become invisible due to index corruption in `state.vscdb`, even though session data files remain intact on disk.
