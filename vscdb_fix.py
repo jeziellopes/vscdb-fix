@@ -827,6 +827,7 @@ def list_workspaces_mode(show_all: bool = False):
         for i, name, sessions_str, short_id, issues_str in compact_data:
             num = str(i).rjust(num_width)
             print(f"  {num}. {name.ljust(max_name)} {sessions_str.rjust(max_sess)}  {short_id}{issues_str}")
+        print()
     elif not compact:
         for i, ws in enumerate(workspaces, 1):
             status = "⚠️  NEEDS REPAIR" if ws.needs_repair else "✅ HEALTHY"
