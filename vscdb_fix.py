@@ -1561,7 +1561,7 @@ def _show_banner():
     try:
         import subprocess
         result = subprocess.run(
-            ["npx", "--yes", "figlet", "-f", "miniwi", "VSCDB-FIX"],
+            ["npx", "--yes", "figlet", "-f", "ANSI Shadow", "VSCDB-FIX"],
             capture_output=True, text=True, timeout=30,
         )
         if result.returncode == 0 and result.stdout.strip():
