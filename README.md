@@ -8,7 +8,7 @@ A utility to repair corrupted chat session indices in VS Code workspace storage 
 
 ---
 
-## Project Status
+## 🔴 Project Status
 
 **This project is no longer actively developed.** It works as-is for its current feature set, but I am no longer using GitHub Copilot or VS Code Chat — I canceled my subscription after spending too much time trying to improve closed-source projects through the AI usage layer. Without daily use, I can't reliably test new scenarios or reproduce regressions.
 
@@ -23,7 +23,7 @@ A utility to repair corrupted chat session indices in VS Code workspace storage 
 
 ---
 
-## Known Limitations
+## ⚠️ Known Limitations
 
 ### VS Code 25-session cap (Issue [#15](https://github.com/jeziellopes/vscdb-fix/issues/15))
 
@@ -41,7 +41,7 @@ If two VS Code windows are open on the same workspace, each maintains its own in
 
 ---
 
-## Quick Start
+## 🚀 Quick Start
 
 ```bash
 # Install
@@ -67,7 +67,7 @@ vscdb-fix --dry-run
 ---
 
 <details>
-<summary><strong>Usage — all commands</strong></summary>
+<summary><strong>📋 Usage — all commands</strong></summary>
 
 ```bash
 # List workspaces that need repair
@@ -99,7 +99,7 @@ vscdb-fix --merge --insiders --yes
 </details>
 
 <details>
-<summary><strong>Cross-Workspace Orphan Detection</strong></summary>
+<summary><strong>🔍 Cross-Workspace Orphan Detection</strong></summary>
 
 When the tool detects orphaned sessions (entries in the index but no file on disk), it automatically checks **all other workspaces** to see if the session file exists elsewhere.
 
@@ -128,7 +128,7 @@ vscdb-fix <target>
 </details>
 
 <details>
-<summary><strong>Technical Overview</strong></summary>
+<summary><strong>⚙️ Technical Overview</strong></summary>
 
 ### Storage Architecture
 
@@ -161,7 +161,7 @@ The index in `state.vscdb` can become corrupted or out of sync with actual sessi
 </details>
 
 <details>
-<summary><strong>Machine Migration</strong></summary>
+<summary><strong>🔄 Machine Migration</strong></summary>
 
 When transferring VS Code workspace storage between machines, VS Code may create **new** workspace storage folders with different hashes — even for the same workspace URI.
 
@@ -182,7 +182,7 @@ This will:
 </details>
 
 <details>
-<summary><strong>Troubleshooting</strong></summary>
+<summary><strong>🛠️ Troubleshooting</strong></summary>
 
 **No workspaces found**
 - Verify VS Code Chat has been used previously
@@ -203,7 +203,7 @@ cp state.vscdb.backup.<timestamp> state.vscdb
 
 ---
 
-## FAQ
+## ❓ FAQ
 
 <details>
 <summary><strong>Can sessions be transferred between workspaces?</strong></summary>
@@ -237,19 +237,19 @@ See [Issue #15](https://github.com/jeziellopes/vscdb-fix/issues/15). VS Code cap
 
 ---
 
-## Upstream Issue
+## 🔝 Upstream Issue
 
 This is a VS Code core bug, not a GitHub Copilot extension issue. The Copilot extension manages only specialized sessions — regular chat session restoration is handled by VS Code's core chat service.
 
 - Technical details: See `VSCODE_CORE_BUG_REPORT.md`
 - File issues: https://github.com/microsoft/vscode/issues
 
-## Contributing
+## 🤝 Contributing
 
 Bug reports and improvements welcome via issues or pull requests.
 
 If you'd like to see active development on this project, consider sponsoring — it's the most direct way to fund the time needed for upstream investigation and VS Code extension development.
 
-## License
+## 📄 License
 
 MIT
