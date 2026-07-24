@@ -47,8 +47,9 @@ Install as a CLI tool:
 
 ```bash
 pip install .
-vscdb-fix --dry-run    # preview
-vscdb-fix              # fix (close VS Code first!)
+vscdb-fix              # preview (dry-run by default)
+vscdb-fix --apply      # actually fix (close VS Code first!)
+vscdb-fix --apply --yes
 ```
 
 With banner support:
@@ -77,23 +78,23 @@ vscdb-fix --list
 vscdb-fix --list --show-all
 
 # Fix a specific workspace
-vscdb-fix <workspace_id>
+vscdb-fix --apply <workspace_id>
 
 # Recover orphaned sessions from other workspaces
-vscdb-fix --recover-orphans
+vscdb-fix --apply --recover-orphans
 
 # Remove orphaned index entries
-vscdb-fix --remove-orphans
+vscdb-fix --apply --remove-orphans
 
 # Remove empty (no-request) sessions
-vscdb-fix --remove-empty
+vscdb-fix --apply --remove-empty
 
 # Merge duplicate workspace folders (machine migration)
-vscdb-fix --merge
+vscdb-fix --apply --merge
 
 # Combine flags
-vscdb-fix --recover-orphans --yes
-vscdb-fix --merge --insiders --yes
+vscdb-fix --apply --recover-orphans --yes
+vscdb-fix --apply --merge --insiders --yes
 ```
 
 </details>

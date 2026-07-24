@@ -1599,9 +1599,9 @@ def main():
         help="With --list, show all workspaces including healthy ones",
     )
     parser.add_argument(
-        "--dry-run",
+        "--apply",
         action="store_true",
-        help="Preview changes without modifying anything",
+        help="Actually apply repairs (default: dry-run preview only)",
     )
     parser.add_argument(
         "-y", "--yes",
@@ -1636,6 +1636,7 @@ def main():
 
     args = parser.parse_args()
     _use_insiders = args.insiders
+    dry_run = not args.apply
 
     _show_banner()
 
@@ -1645,11 +1646,15 @@ def main():
 
     # Merge mode
     if args.merge:
-        return merge_workspaces_mode(args.dry_run, args.yes)
+        return merge_workspaces_mode(dry_run, args.yes)
 
     # Single workspace mode
     if args.workspace_id:
-        if not args.dry_run and not args.yes:
+        if dry_run and not args.yes:
+            print("🔍 DRY RUN — no changes will be made.")
+            print()
+
+        if not dry_run and not args.yes:
             print("⚠️  IMPORTANT: Please close VS Code completely before continuing!")
             print()
             response = input("Have you closed VS Code? (yes/no): ").strip().lower()
@@ -1660,12 +1665,16 @@ def main():
             print()
 
         return repair_single_workspace(
-            args.workspace_id, args.dry_run, args.remove_orphans,
+            args.workspace_id, dry_run, args.remove_orphans,
             args.recover_orphans, args.yes, args.remove_empty,
         )
 
     # Auto-repair all workspaces mode (default)
-    if not args.dry_run and not args.yes:
+    if dry_run and not args.yes:
+        print("🔍 DRY RUN — no changes will be made.")
+        print()
+
+    if not dry_run and not args.yes:
         print()
         print("⚠️  IMPORTANT: Please close VS Code completely before continuing!")
         print()
@@ -1676,7 +1685,7 @@ def main():
             return 1
 
     return repair_all_workspaces(
-        args.dry_run, args.yes, args.remove_orphans,
+        dry_run, args.yes, args.remove_orphans,
         args.recover_orphans, args.remove_empty,
     )
 
