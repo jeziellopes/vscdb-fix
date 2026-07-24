@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/jeziellopes/vscdb-fix/compare/v1.4.0...v1.4.1) (2026-07-24)
+
+
+### Bug Fixes
+
+* show banner before argparse so --help displays it too ([62bb73d](https://github.com/jeziellopes/vscdb-fix/commit/62bb73d8ec42f145707f6ccc1c50bb2a439f3cb4))
+
 # [1.4.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.3.0...v1.4.0) (2026-07-24)
 
 
