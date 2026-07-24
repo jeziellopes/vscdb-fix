@@ -873,6 +873,7 @@ def list_workspaces_mode(show_all: bool = False):
     
     if needs_repair:
         print(f"📊 Summary: {len(needs_repair)} workspace(s) need repair")
+        print()
         if not compact:
             print()
             print("To repair all workspaces:")
