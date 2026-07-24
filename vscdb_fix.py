@@ -775,14 +775,17 @@ def repair_workspace(workspace: WorkspaceInfo, dry_run: bool = False, show_detai
 
 def list_workspaces_mode(show_all: bool = False):
     """List workspaces with chat sessions."""
-    print()
-    print("=" * 70)
-    if show_all:
-        print("VS Code Workspaces with Chat Sessions")
-    else:
-        print("VS Code Workspaces That Need Repair")
-    print("=" * 70)
-    print()
+    compact = _compact
+
+    if not compact:
+        print()
+        print("=" * 70)
+        if show_all:
+            print("VS Code Workspaces with Chat Sessions")
+        else:
+            print("VS Code Workspaces That Need Repair")
+        print("=" * 70)
+        print()
 
     workspaces = scan_workspaces()
 
@@ -800,10 +803,21 @@ def list_workspaces_mode(show_all: bool = False):
     print()
 
     for i, ws in enumerate(workspaces, 1):
+        if compact:
+            issues = []
+            if ws.missing_from_index:
+                issues.append(f"missing:{len(ws.missing_from_index)}")
+            if ws.missing_from_agent_cache:
+                issues.append(f"cache:{len(ws.missing_from_agent_cache)}")
+            if ws.orphaned_in_index:
+                issues.append(f"orphans:{len(ws.orphaned_in_index)}")
+            status = f"⚠️  {', '.join(issues)}" if issues else "✅"
+            print(f"  {i}. {ws.get_display_name()} — {len(ws.sessions_on_disk)} sessions — {status}")
+            continue
+
         status = "⚠️  NEEDS REPAIR" if ws.needs_repair else "✅ HEALTHY"
         print(f"{i}. {ws.get_display_name()} - {status}")
         
-        # Show full ID if we have Unknown workspace
         if not ws.folder and not ws.workspace_file:
             print(f"   ID: {ws.id}")
         
@@ -833,16 +847,18 @@ def list_workspaces_mode(show_all: bool = False):
     
     if needs_repair:
         print(f"📊 Summary: {len(needs_repair)} workspace(s) need repair")
-        print()
-        print("To repair all workspaces:")
-        print("  python3 vscdb_fix.py")
-        print()
-        print("To repair a specific workspace:")
-        print(f"  python3 vscdb_fix.py {needs_repair[0].id}")
-        print()
+        if not compact:
+            print()
+            print("To repair all workspaces:")
+            print("  vscdb-fix --apply")
+            print()
+            print("To repair a specific workspace:")
+            print(f"  vscdb-fix --apply {needs_repair[0].id}")
+            print()
     else:
         print("✅ All workspaces are healthy!")
-        print()
+        if not compact:
+            print()
 
     return 0
 
@@ -1573,8 +1589,8 @@ def _show_banner():
             reset = "\033[0m"
             print()
             for line in result.stdout.splitlines():
-                print(f"{blue}{line}{reset}")
-            print(f"{blue}  Repair corrupted chat session indices in VS Code{reset}")
+                print(f"  {blue}{line}{reset}")
+            print(f"  {blue}  Repair corrupted chat session indices in VS Code{reset}")
             print()
             return
     except (FileNotFoundError, subprocess.TimeoutExpired):
@@ -1586,7 +1602,7 @@ def _show_banner():
 
 
 def main():
-    global _use_insiders
+    global _use_insiders, _compact
 
     import argparse
 
