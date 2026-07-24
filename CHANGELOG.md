@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.1.0...v1.2.0) (2026-07-24)
+
+
+### Features
+
+* convert to proper CLI tool with argparse and pyproject.toml ([468eb16](https://github.com/jeziellopes/vscdb-fix/commit/468eb162652fec4906d93014e35b7f3bf491103a))
+
 # [1.1.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.0.0...v1.1.0) (2026-03-02)
 
 
