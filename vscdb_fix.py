@@ -802,6 +802,7 @@ def list_workspaces_mode(show_all: bool = False):
     print(f"Found {len(workspaces)} workspace(s):")
     print()
 
+    compact_data = []
     for i, ws in enumerate(workspaces, 1):
         if compact:
             issues = []
@@ -811,37 +812,50 @@ def list_workspaces_mode(show_all: bool = False):
                 issues.append(f"cache:{len(ws.missing_from_agent_cache)}")
             if ws.orphaned_in_index:
                 issues.append(f"orphans:{len(ws.orphaned_in_index)}")
-            status = f"⚠️  {', '.join(issues)}" if issues else "✅"
-            print(f"  {i}. {ws.get_display_name()} — {len(ws.sessions_on_disk)} sessions — {status}")
+            name = extract_project_name(ws.folder or ws.workspace_file) or ws.id[:8]
+            short_id = ws.id[:8]
+            issues_str = f" ⚠️  {', '.join(issues)}" if issues else ""
+            sessions_str = f"{len(ws.sessions_on_disk)} sessions"
+            compact_data.append((i, name, sessions_str, short_id, issues_str))
             continue
 
-        status = "⚠️  NEEDS REPAIR" if ws.needs_repair else "✅ HEALTHY"
-        print(f"{i}. {ws.get_display_name()} - {status}")
-        
-        if not ws.folder and not ws.workspace_file:
-            print(f"   ID: {ws.id}")
-        
-        if ws.folder:
-            print(f"   Folder: {ws.folder}")
-        elif ws.workspace_file:
-            print(f"   Workspace file: {ws.workspace_file}")
-        
-        print(f"   Sessions on disk: {len(ws.sessions_on_disk)}")
-        print(f"   Sessions in index: {len(ws.sessions_in_index)}")
-        if ws.empty_sessions_in_index:
-            print(f"   Sessions empty: {len(ws.empty_sessions_in_index)}")
-        print(f"   Sessions in agent cache: {len(ws.sessions_in_agent_cache)}")
-        
-        if ws.missing_from_index:
-            print(f"   ⚠️  Missing from index: {len(ws.missing_from_index)}")
-        
-        if ws.missing_from_agent_cache:
-            print(f"   ⚠️  Missing from agent cache: {len(ws.missing_from_agent_cache)}")
-        
-        if ws.orphaned_in_index:
-            print(f"   🗑️  Orphaned in index: {len(ws.orphaned_in_index)}")
-        
-        print()
+    # Flush compact output with dynamic padding
+    if compact and compact_data:
+        max_name = max(len(d[1]) for d in compact_data)
+        max_sess = max(len(d[2]) for d in compact_data)
+        num_width = len(str(len(compact_data)))
+        for i, name, sessions_str, short_id, issues_str in compact_data:
+            num = str(i).rjust(num_width)
+            print(f"  {num}. {name.ljust(max_name)} {sessions_str.rjust(max_sess)}  {short_id}{issues_str}")
+    elif not compact:
+        for i, ws in enumerate(workspaces, 1):
+            status = "⚠️  NEEDS REPAIR" if ws.needs_repair else "✅ HEALTHY"
+            print(f"{i}. {ws.get_display_name()} - {status}")
+            
+            if not ws.folder and not ws.workspace_file:
+                print(f"   ID: {ws.id}")
+            
+            if ws.folder:
+                print(f"   Folder: {ws.folder}")
+            elif ws.workspace_file:
+                print(f"   Workspace file: {ws.workspace_file}")
+            
+            print(f"   Sessions on disk: {len(ws.sessions_on_disk)}")
+            print(f"   Sessions in index: {len(ws.sessions_in_index)}")
+            if ws.empty_sessions_in_index:
+                print(f"   Sessions empty: {len(ws.empty_sessions_in_index)}")
+            print(f"   Sessions in agent cache: {len(ws.sessions_in_agent_cache)}")
+            
+            if ws.missing_from_index:
+                print(f"   ⚠️  Missing from index: {len(ws.missing_from_index)}")
+            
+            if ws.missing_from_agent_cache:
+                print(f"   ⚠️  Missing from agent cache: {len(ws.missing_from_agent_cache)}")
+            
+            if ws.orphaned_in_index:
+                print(f"   🗑️  Orphaned in index: {len(ws.orphaned_in_index)}")
+            
+            print()
 
     needs_repair = [ws for ws in workspaces if ws.needs_repair]
     
@@ -1576,8 +1590,6 @@ def merge_workspaces_mode(dry_run: bool = False, auto_yes: bool = False) -> int:
 
 def _show_banner():
     """Print figlet-style banner using figlet.js (ANSI Shadow font) in VS Code blue."""
-    if "--compact" in sys.argv:
-        return
     try:
         import subprocess
         result = subprocess.run(
