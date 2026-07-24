@@ -43,42 +43,86 @@ If two VS Code windows are open on the same workspace, each maintains its own in
 
 ## Quick Start
 
-### Step 1: Preview Changes
-
 ```bash
+# Preview what would be fixed
 python3 fix_chat_history.py --dry-run
-```
 
-Displays affected workspaces and sessions to be restored without modifying any files.
-
-### Step 2: Apply the Fix
-
-**Close VS Code completely**, then run:
-
-```bash
+# Fix everything (close VS Code first!)
 python3 fix_chat_history.py
+
+# Fix everything automatically
+python3 fix_chat_history.py --yes
 ```
 
-### Step 3: Verify
-
-Restart VS Code and verify sessions appear in the Chat view.
-
-### VS Code Insiders
-
-For VS Code Insiders users, add the `--insiders` flag:
-
-```bash
-python3 fix_chat_history.py --insiders --dry-run
-python3 fix_chat_history.py --insiders
-```
+For VS Code Insiders, add `--insiders` to any command.
 
 ---
 
-## Technical Overview
+<details>
+<summary><strong>Usage — all commands</strong></summary>
+
+```bash
+# List workspaces that need repair
+python3 fix_chat_history.py --list
+
+# List all workspaces (including healthy)
+python3 fix_chat_history.py --list --show-all
+
+# Fix a specific workspace
+python3 fix_chat_history.py <workspace_id>
+
+# Recover orphaned sessions from other workspaces
+python3 fix_chat_history.py --recover-orphans
+
+# Remove orphaned index entries
+python3 fix_chat_history.py --remove-orphans
+
+# Remove empty (no-request) sessions
+python3 fix_chat_history.py --remove-empty
+
+# Merge duplicate workspace folders (machine migration)
+python3 fix_chat_history.py --merge
+
+# Combine flags
+python3 fix_chat_history.py --recover-orphans --yes
+python3 fix_chat_history.py --merge --insiders --yes
+```
+
+</details>
+
+<details>
+<summary><strong>Cross-Workspace Orphan Detection</strong></summary>
+
+When the tool detects orphaned sessions (entries in the index but no file on disk), it automatically checks **all other workspaces** to see if the session file exists elsewhere.
+
+**Project Folder Matching:** The tool intelligently detects if an orphaned session belongs to the same project by comparing folder names.
+
+```
+# Orphan from a different project:
+🗑️  Orphaned in index: 2
+   💡 Session abc12345... found in workspace a1b2c3d4 (/home/user/other-project)
+
+# Orphan from the SAME project (highlighted):
+🗑️  Orphaned in index: 2
+   💡 Session def67890... found in workspace e5f6g7h8 (file:///home/user/workspace/my-app)
+      ⭐ Same project folder: 'my-app' - likely belongs here!
+```
+
+Recover automatically: `python3 fix_chat_history.py --recover-orphans`
+
+Or manually:
+```bash
+cp ~/.config/Code/User/workspaceStorage/<source>/chatSessions/<session-id>.json \
+   ~/.config/Code/User/workspaceStorage/<target>/chatSessions/
+python3 fix_chat_history.py <target>
+```
+
+</details>
+
+<details>
+<summary><strong>Technical Overview</strong></summary>
 
 ### Storage Architecture
-
-VS Code's core chat service (not the GitHub Copilot extension) manages regular chat sessions using the following structure:
 
 ```
 ~/.config/Code/User/workspaceStorage/<workspace-id>/
@@ -92,191 +136,26 @@ VS Code's core chat service (not the GitHub Copilot extension) manages regular c
     └── session-3.json
 ```
 
-**Session File Formats:**
 - `.json` — Legacy format: full conversation as a single JSON object
-- `.jsonl` — Newer format (JSON Lines): mutation log with `kind:0` (initial state), `kind:1` (set mutation), `kind:2` (array splice/push)
-
-**Database Keys:**
-- `chat.ChatSessionStore.index` — Session metadata index (title, timestamp, location)
-- `agentSessions.model.cache` — Agent/Copilot panel session list (resource URIs, labels, timing)
-- `agentSessions.state.cache` — Agent panel read/archive state
-
-**Session Restoration Process:**
-- On startup, VS Code reads both `chat.ChatSessionStore.index` and `agentSessions.model.cache` to populate the Chat/Agent panel
+- `.jsonl` — Newer format: mutation log with `kind:0` (initial state), `kind:1` (set mutation), `kind:2` (array splice/push)
 
 ### Root Cause
 
-The index in `state.vscdb` can become corrupted or out of sync with actual session files, causing:
-- Session data files remain intact on disk
-- Index missing entries for existing sessions
-- VS Code unable to discover sessions during restoration
-
-**Example scenario:**
-- Session files on disk: 13
-- Index entries in database: 1
-- Sessions visible in UI: 1
+The index in `state.vscdb` can become corrupted or out of sync with actual session files. Example: 13 session files on disk, 1 index entry, 1 visible session.
 
 ### Repair Process
 
-The tool performs the following operations:
-1. Scans `chatSessions/` directory for all session JSON files
+1. Scans `chatSessions/` directory for all session JSON/JSONL files
 2. Extracts metadata from each session file
 3. Rebuilds `chat.ChatSessionStore.index` in `state.vscdb`
 4. Creates timestamped backup before modifications
 
----
+</details>
 
-## Usage
+<details>
+<summary><strong>Machine Migration</strong></summary>
 
-### Quick Start (Recommended)
-
-Auto-repair all workspaces that need fixing:
-
-```bash
-# Safe preview - see what would be fixed
-python3 fix_chat_history.py --dry-run
-
-# Fix everything (asks for confirmation)
-python3 fix_chat_history.py
-
-# Fix everything automatically (no prompts)
-python3 fix_chat_history.py --yes
-```
-
-### List Workspaces
-
-List workspaces that need repair:
-
-```bash
-python3 fix_chat_history.py --list
-```
-
-To include healthy workspaces as well:
-
-```bash
-python3 fix_chat_history.py --list --show-all
-```
-
-### Repair Specific Workspace
-
-If you want to fix only one workspace:
-
-```bash
-# Fix a specific workspace by ID
-python3 fix_chat_history.py <workspace_id>
-
-# Example
-python3 fix_chat_history.py f4c750964946a489902dcd863d1907de
-```
-
-### Advanced Options
-
-```bash
-# Show all workspaces, including healthy ones
-python3 fix_chat_history.py --list --show-all
-
-# Recover orphaned sessions from other workspaces
-python3 fix_chat_history.py --recover-orphans
-
-# Remove orphaned index entries (default: keep them)
-python3 fix_chat_history.py --remove-orphans
-
-# Combine flags: recover orphans + auto-confirm
-python3 fix_chat_history.py --recover-orphans --yes
-
-# Use VS Code Insiders instead of regular VS Code
-python3 fix_chat_history.py --insiders
-
-# Merge duplicate workspace folders (see Machine Migration below)
-python3 fix_chat_history.py --merge
-
-# Help and all options
-python3 fix_chat_history.py --help
-```
-
----
-
-## Cross-Workspace Orphan Detection
-
-When the tool detects orphaned sessions (entries in the index but no file on disk), it automatically checks **all other workspaces** to see if the session file exists elsewhere.
-
-**Project Folder Matching:** The tool intelligently detects if an orphaned session belongs to the same project by comparing folder names.
-
-This helps you:
-- **Recover accidentally moved sessions** — If a session was associated with the wrong workspace
-- **Identify same-project sessions** — Highlights sessions from the same project folder (e.g., both workspaces have "my-app" in the path)
-- **Understand orphaned entries** — Know if they're truly lost or just in the wrong workspace
-
-### Example Output
-
-**Orphan from a different project:**
-```
-🗑️  Orphaned in index: 2
-   💡 Session abc12345... found in workspace a1b2c3d4 (/home/user/other-project)
-```
-
-**Orphan from the SAME project (highlighted):**
-```
-🗑️  Orphaned in index: 2
-   💡 Session def67890... found in workspace e5f6g7h8 (file:///home/user/workspace/my-app)
-      ⭐ Same project folder: 'my-app' - likely belongs here!
-```
-
-### How to Recover Cross-Workspace Sessions
-
-**Method 1: Automatic Recovery (Recommended)**
-
-```bash
-# Automatically copy orphaned sessions from other workspaces
-python3 fix_chat_history.py --recover-orphans
-
-# Or for a specific workspace
-python3 fix_chat_history.py <workspace-id> --recover-orphans
-```
-
-**Method 2: Manual Copy**
-
-```bash
-# Copy the session file from the other workspace
-cp ~/.config/Code/User/workspaceStorage/<source-workspace-id>/chatSessions/<session-id>.json \
-   ~/.config/Code/User/workspaceStorage/<target-workspace-id>/chatSessions/
-
-# Then re-run the repair tool to add it to the index
-python3 fix_chat_history.py <target-workspace-id>
-```
-
----
-
-## Important Considerations
-
-### Prerequisites
-
-- Close VS Code completely before running repair scripts to prevent database locks and conflicts
-
-### Safety Features
-
-- Automatic backup creation before any modifications
-- Read-only preview mode via `--dry-run` flag
-- Index-only modifications — session data files remain untouched
-- Zero data loss risk
-
-### System Requirements
-
-- Python 3.6+
-- No external dependencies (uses Python standard library only)
-- Cross-platform: Linux, macOS, Windows
-
----
-
-## Machine Migration
-
-When transferring VS Code workspace storage from one machine to another (e.g., copying `%APPDATA%\Code\User\` to a new laptop), VS Code may create **new** workspace storage folders with different hashes — even for the same workspace URI. This means:
-
-- Your old sessions exist on disk in the **old** folder
-- VS Code reads from a **new** folder (different hash)
-- Sessions are invisible in the UI
-
-The `--merge` flag detects these duplicate folders and copies the missing sessions into the active one:
+When transferring VS Code workspace storage between machines, VS Code may create **new** workspace storage folders with different hashes — even for the same workspace URI.
 
 ```bash
 # Preview what would be merged
@@ -284,90 +163,78 @@ python3 fix_chat_history.py --merge --dry-run
 
 # Apply the merge (close VS Code first!)
 python3 fix_chat_history.py --merge --yes
-
-# For VS Code Insiders
-python3 fix_chat_history.py --merge --insiders --yes
 ```
 
 This will:
-1. Find workspace URIs that have multiple storage folders
+1. Find workspace URIs with multiple storage folders
 2. Identify the active (newest) folder for each
 3. Copy missing session files from old folders into the active one
-4. Update `chat.ChatSessionStore.index`, `agentSessions.model.cache`, and `agentSessions.state.cache`
+4. Update all three database keys
 
----
+</details>
 
-## Troubleshooting
+<details>
+<summary><strong>Troubleshooting</strong></summary>
 
 **No workspaces found**
 - Verify VS Code Chat has been used previously
-- Confirm workspace storage directory exists: `~/.config/Code/User/workspaceStorage/` (Linux/macOS) or `%APPDATA%\Code\User\workspaceStorage\` (Windows)
-- For VS Code Insiders, use `--insiders` flag or check `Code - Insiders` directory
+- Confirm `~/.config/Code/User/workspaceStorage/` exists (Linux/macOS) or `%APPDATA%\Code\User\workspaceStorage\` (Windows)
 
 **Sessions not restored after repair**
 - Confirm VS Code was completely closed before running the script
 - Reload VS Code window: `Ctrl+Shift+P` -> "Reload Window"
-- Verify backup file creation was successful
-- Check workspace ID matches current project
-- If you migrated from another machine, try `--merge` mode first — VS Code may have created new storage folders
-- **If sessions disappear after restart**, see [Issue #15](https://github.com/jeziellopes/vscdb-fix/issues/15) — VS Code's 25-session cap and stale cache cause this
+- If migrated from another machine, try `--merge` first
+- **If sessions disappear after restart**, see [Issue #15](https://github.com/jeziellopes/vscdb-fix/issues/15)
 
-**Rollback procedure**
-- Locate backup: `state.vscdb.backup.<timestamp>`
-- Replace current database: `cp state.vscdb.backup.<timestamp> state.vscdb`
+**Rollback**
+```bash
+cp state.vscdb.backup.<timestamp> state.vscdb
+```
 
----
-
-## Upstream Issue
-
-This is a VS Code core bug, not a GitHub Copilot extension issue. The Copilot extension manages only specialized sessions (Claude Code, Copilot CLI, PR sessions) — regular chat session restoration is handled by VS Code's core chat service.
-
-**Analysis:**
-- `chat.ChatSessionStore.index` in `state.vscdb` becomes desynchronized from session files
-- Write operations succeed but read/restoration logic fails
-- Race condition in VS Code's chat service initialization
-- 25-session hard cap trims restored sessions on shutdown
-- In-memory cache is never invalidated from external writes
-
-### Reporting
-
-- Technical details: See `VSCODE_CORE_BUG_REPORT.md`
-- File issues: https://github.com/microsoft/vscode/issues
+</details>
 
 ---
 
 ## FAQ
 
-**Can sessions be transferred between workspaces?**
+<details>
+<summary><strong>Can sessions be transferred between workspaces?</strong></summary>
+
 Yes. Session files are standard JSON or JSONL. Copy files between workspace `chatSessions/` directories, then run the repair script to update the index.
+</details>
 
-**How do I fix sessions after migrating to a new machine?**
-Use `python3 fix_chat_history.py --merge` — this detects duplicate workspace storage folders (old vs new hashes) and merges sessions into the active one.
+<details>
+<summary><strong>Does this work with VS Code Insiders?</strong></summary>
 
-**Does this work with VS Code Insiders?**
 Yes. Add the `--insiders` flag to any command, e.g., `python3 fix_chat_history.py --insiders --dry-run`.
+</details>
 
-**Folder mode vs workspace file (.code-workspace) storage?**
-Different workspace modes use distinct storage locations. Chat histories exist in both locations but are isolated by workspace context.
+<details>
+<summary><strong>Does this tool delete any data?</strong></summary>
 
-**Does this tool delete any data?**
 No. Only the database index is modified. Session data files are read-only operations.
+</details>
 
-**What are orphaned index entries?**
-Index references to non-existent session files. Retained by default for safety (e.g., temporarily unmounted drives). Use `--remove-orphans` to clean up.
+<details>
+<summary><strong>What are orphaned index entries?</strong></summary>
 
-**Why do my restored sessions disappear after restarting VS Code?**
+Index references to non-existent session files. Retained by default for safety. Use `--remove-orphans` to clean up.
+</details>
+
+<details>
+<summary><strong>Why do my restored sessions disappear after restarting VS Code?</strong></summary>
+
 See [Issue #15](https://github.com/jeziellopes/vscdb-fix/issues/15). VS Code caps the index at 25 sessions and overwrites external fixes with its stale in-memory cache on shutdown.
+</details>
 
 ---
 
-## Use Cases
+## Upstream Issue
 
-Addresses the following symptoms:
-- Chat history disappears after VS Code restart
-- Previously visible sessions no longer appear in Chat view
-- Session count mismatch between filesystem and UI
-- Workspace migration with incomplete session restoration
+This is a VS Code core bug, not a GitHub Copilot extension issue. The Copilot extension manages only specialized sessions — regular chat session restoration is handled by VS Code's core chat service.
+
+- Technical details: See `VSCODE_CORE_BUG_REPORT.md`
+- File issues: https://github.com/microsoft/vscode/issues
 
 ## Contributing
 
@@ -378,10 +245,3 @@ If you'd like to see active development on this project, consider sponsoring —
 ## License
 
 MIT
-
-## Support
-
-For issues, provide:
-- OS and VS Code version
-- Output from `--dry-run` mode
-- Complete error messages and stack traces
