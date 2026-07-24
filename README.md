@@ -8,7 +8,7 @@ A utility to repair corrupted chat session indices in VS Code workspace storage 
 
 ---
 
-## 🔴 Project Status
+## 🔸 Project Status
 
 **This project is no longer actively developed.** It works as-is for its current feature set, but I am no longer using GitHub Copilot or VS Code Chat — I canceled my subscription after spending too much time trying to improve closed-source projects through the AI usage layer. Without daily use, I can't reliably test new scenarios or reproduce regressions.
 
@@ -43,25 +43,18 @@ If two VS Code windows are open on the same workspace, each maintains its own in
 
 ## 🚀 Quick Start
 
+Install as a CLI tool:
+
 ```bash
-# Install
 pip install .
-
-# Preview what would be fixed
-vscdb-fix --dry-run
-
-# Fix everything (close VS Code first!)
-vscdb-fix
-
-# Fix everything automatically
-vscdb-fix --yes
+vscdb-fix --dry-run    # preview
+vscdb-fix              # fix (close VS Code first!)
 ```
 
-For VS Code Insiders, add `--insiders` to any command.
+Or run directly without installing:
 
-You can also run directly without installing:
 ```bash
-vscdb-fix --dry-run
+python3 fix_chat_history.py --dry-run
 ```
 
 ---
