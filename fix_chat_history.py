@@ -1557,18 +1557,25 @@ def merge_workspaces_mode(dry_run: bool = False, auto_yes: bool = False) -> int:
 
 
 def _show_banner():
-    """Print figlet-style banner if pyfiglet is installed, else simple header."""
+    """Print figlet-style banner using figlet.js (Coder Mini font)."""
     try:
-        import pyfiglet
-        banner = pyfiglet.figlet_format("VSCDB-FIX", font="slant")
-        print(banner)
-        print("  Repair corrupted chat session indices in VS Code")
-        print()
-    except ImportError:
-        print("=" * 50)
-        print("  vscdb-fix — VS Code Chat History Repair")
-        print("=" * 50)
-        print()
+        import subprocess
+        result = subprocess.run(
+            ["node", "-e", "console.log(require('figlet').textSync('VSCDB-FIX',{font:'miniwi'}))"],
+            capture_output=True, text=True, timeout=5,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            print(result.stdout)
+            print("  Repair corrupted chat session indices in VS Code")
+            print()
+            return
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        pass
+    # Fallback if node/figlet not available
+    print("=" * 50)
+    print("  vscdb-fix — VS Code Chat History Repair")
+    print("=" * 50)
+    print()
 
 
 def main():

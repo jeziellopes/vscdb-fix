@@ -52,12 +52,7 @@ vscdb-fix --apply      # actually fix (close VS Code first!)
 vscdb-fix --apply --yes
 ```
 
-With banner support:
-
-```bash
-pip install ".[cli]"
-vscdb-fix
-```
+Banner requires `figlet` (npm) — auto-detected if available, otherwise shows a simple header.
 
 Or run directly without installing:
 
