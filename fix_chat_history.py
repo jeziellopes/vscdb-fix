@@ -1561,8 +1561,8 @@ def _show_banner():
     try:
         import subprocess
         result = subprocess.run(
-            ["node", "-e", "console.log(require('figlet').textSync('VSCDB-FIX',{font:'miniwi'}))"],
-            capture_output=True, text=True, timeout=5,
+            ["npx", "--yes", "figlet", "-f", "miniwi", "VSCDB-FIX"],
+            capture_output=True, text=True, timeout=30,
         )
         if result.returncode == 0 and result.stdout.strip():
             print(result.stdout)
