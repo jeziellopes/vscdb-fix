@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.7.1...v1.8.0) (2026-07-24)
+
+
+### Features
+
+* add --redacted flag to redact project names for safe sharing ([c3e0dc8](https://github.com/jeziellopes/vscdb-fix/commit/c3e0dc80536b5759d9533d1932815887c6f62a60))
+
 ## [1.7.1](https://github.com/jeziellopes/vscdb-fix/compare/v1.7.0...v1.7.1) (2026-07-24)
 
 
