@@ -8,7 +8,7 @@ A utility to repair corrupted chat session indices in VS Code workspace storage 
 
 ---
 
-## 🔸 Project Status
+## 🚧 Project Status
 
 **This project is no longer actively developed.** It works as-is for its current feature set, but I am no longer using GitHub Copilot or VS Code Chat — I canceled my subscription after spending too much time trying to improve closed-source projects through the AI usage layer. Without daily use, I can't reliably test new scenarios or reproduce regressions.
 
@@ -234,7 +234,6 @@ See [Issue #15](https://github.com/jeziellopes/vscdb-fix/issues/15). VS Code cap
 
 This is a VS Code core bug, not a GitHub Copilot extension issue. The Copilot extension manages only specialized sessions — regular chat session restoration is handled by VS Code's core chat service.
 
-- Technical details: See `VSCODE_CORE_BUG_REPORT.md`
 - File issues: https://github.com/microsoft/vscode/issues
 
 ## 🤝 Contributing
