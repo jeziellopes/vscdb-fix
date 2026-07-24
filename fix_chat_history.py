@@ -1559,40 +1559,80 @@ def merge_workspaces_mode(dry_run: bool = False, auto_yes: bool = False) -> int:
 def main():
     global _use_insiders
 
-    # Parse flags
-    dry_run = '--dry-run' in sys.argv
-    auto_yes = '--yes' in sys.argv
-    remove_orphans = '--remove-orphans' in sys.argv
-    remove_empty = '--remove-empty' in sys.argv
-    recover_orphans = '--recover-orphans' in sys.argv
-    list_mode = '--list' in sys.argv
-    show_all = '--show-all' in sys.argv
-    merge_mode = '--merge' in sys.argv
-    show_help = '--help' in sys.argv or '-h' in sys.argv
-    _use_insiders = '--insiders' in sys.argv
+    import argparse
 
-    if show_help:
-        print(__doc__)
-        return 0
+    parser = argparse.ArgumentParser(
+        prog="vscdb-fix",
+        description="Repair corrupted chat session indices in VS Code workspace storage databases.",
+        epilog="IMPORTANT: Close VS Code completely before running repairs!",
+    )
+
+    parser.add_argument(
+        "workspace_id",
+        nargs="?",
+        default=None,
+        help="Repair a specific workspace by ID",
+    )
+    parser.add_argument(
+        "--list",
+        action="store_true",
+        help="List workspaces that need repair",
+    )
+    parser.add_argument(
+        "--show-all",
+        action="store_true",
+        help="With --list, show all workspaces including healthy ones",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview changes without modifying anything",
+    )
+    parser.add_argument(
+        "-y", "--yes",
+        action="store_true",
+        help="Skip confirmation prompts",
+    )
+    parser.add_argument(
+        "--remove-orphans",
+        action="store_true",
+        help="Remove orphaned index entries (default: keep them)",
+    )
+    parser.add_argument(
+        "--remove-empty",
+        action="store_true",
+        help="Remove empty sessions (no requests) from index and caches",
+    )
+    parser.add_argument(
+        "--recover-orphans",
+        action="store_true",
+        help="Copy orphaned sessions from other workspaces",
+    )
+    parser.add_argument(
+        "--merge",
+        action="store_true",
+        help="Merge sessions from duplicate workspace folders",
+    )
+    parser.add_argument(
+        "--insiders",
+        action="store_true",
+        help="Use VS Code Insiders storage instead of regular VS Code",
+    )
+
+    args = parser.parse_args()
+    _use_insiders = args.insiders
 
     # List mode
-    if list_mode:
-        return list_workspaces_mode(show_all=show_all)
+    if args.list:
+        return list_workspaces_mode(show_all=args.show_all)
 
-    # Merge mode - merge sessions from duplicate workspace storage folders
-    if merge_mode:
-        return merge_workspaces_mode(dry_run, auto_yes)
-
-    # Find first non-flag argument to use as workspace id
-    workspace_id = None
-    for arg in sys.argv[1:]:
-        if not arg.startswith('-'):
-            workspace_id = arg
-            break
+    # Merge mode
+    if args.merge:
+        return merge_workspaces_mode(args.dry_run, args.yes)
 
     # Single workspace mode
-    if workspace_id:
-        if not dry_run and not auto_yes:
+    if args.workspace_id:
+        if not args.dry_run and not args.yes:
             print("⚠️  IMPORTANT: Please close VS Code completely before continuing!")
             print()
             response = input("Have you closed VS Code? (yes/no): ").strip().lower()
@@ -1602,10 +1642,13 @@ def main():
                 return 1
             print()
 
-        return repair_single_workspace(workspace_id, dry_run, remove_orphans, recover_orphans, auto_yes, remove_empty)
+        return repair_single_workspace(
+            args.workspace_id, args.dry_run, args.remove_orphans,
+            args.recover_orphans, args.yes, args.remove_empty,
+        )
 
     # Auto-repair all workspaces mode (default)
-    if not dry_run and not auto_yes:
+    if not args.dry_run and not args.yes:
         print()
         print("⚠️  IMPORTANT: Please close VS Code completely before continuing!")
         print()
@@ -1615,7 +1658,10 @@ def main():
             print("❌ Aborted. Please close VS Code and run this script again.")
             return 1
 
-    return repair_all_workspaces(dry_run, auto_yes, remove_orphans, recover_orphans, remove_empty)
+    return repair_all_workspaces(
+        args.dry_run, args.yes, args.remove_orphans,
+        args.recover_orphans, args.remove_empty,
+    )
 
 if __name__ == "__main__":
     exit_code = main()

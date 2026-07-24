@@ -44,17 +44,25 @@ If two VS Code windows are open on the same workspace, each maintains its own in
 ## Quick Start
 
 ```bash
+# Install
+pip install .
+
 # Preview what would be fixed
-python3 fix_chat_history.py --dry-run
+vscdb-fix --dry-run
 
 # Fix everything (close VS Code first!)
-python3 fix_chat_history.py
+vscdb-fix
 
 # Fix everything automatically
-python3 fix_chat_history.py --yes
+vscdb-fix --yes
 ```
 
 For VS Code Insiders, add `--insiders` to any command.
+
+You can also run directly without installing:
+```bash
+vscdb-fix --dry-run
+```
 
 ---
 
@@ -63,29 +71,29 @@ For VS Code Insiders, add `--insiders` to any command.
 
 ```bash
 # List workspaces that need repair
-python3 fix_chat_history.py --list
+vscdb-fix --list
 
 # List all workspaces (including healthy)
-python3 fix_chat_history.py --list --show-all
+vscdb-fix --list --show-all
 
 # Fix a specific workspace
-python3 fix_chat_history.py <workspace_id>
+vscdb-fix <workspace_id>
 
 # Recover orphaned sessions from other workspaces
-python3 fix_chat_history.py --recover-orphans
+vscdb-fix --recover-orphans
 
 # Remove orphaned index entries
-python3 fix_chat_history.py --remove-orphans
+vscdb-fix --remove-orphans
 
 # Remove empty (no-request) sessions
-python3 fix_chat_history.py --remove-empty
+vscdb-fix --remove-empty
 
 # Merge duplicate workspace folders (machine migration)
-python3 fix_chat_history.py --merge
+vscdb-fix --merge
 
 # Combine flags
-python3 fix_chat_history.py --recover-orphans --yes
-python3 fix_chat_history.py --merge --insiders --yes
+vscdb-fix --recover-orphans --yes
+vscdb-fix --merge --insiders --yes
 ```
 
 </details>
@@ -108,13 +116,13 @@ When the tool detects orphaned sessions (entries in the index but no file on dis
       ⭐ Same project folder: 'my-app' - likely belongs here!
 ```
 
-Recover automatically: `python3 fix_chat_history.py --recover-orphans`
+Recover automatically: `vscdb-fix --recover-orphans`
 
 Or manually:
 ```bash
 cp ~/.config/Code/User/workspaceStorage/<source>/chatSessions/<session-id>.json \
    ~/.config/Code/User/workspaceStorage/<target>/chatSessions/
-python3 fix_chat_history.py <target>
+vscdb-fix <target>
 ```
 
 </details>
@@ -159,10 +167,10 @@ When transferring VS Code workspace storage between machines, VS Code may create
 
 ```bash
 # Preview what would be merged
-python3 fix_chat_history.py --merge --dry-run
+vscdb-fix --merge --dry-run
 
 # Apply the merge (close VS Code first!)
-python3 fix_chat_history.py --merge --yes
+vscdb-fix --merge --yes
 ```
 
 This will:
@@ -206,7 +214,7 @@ Yes. Session files are standard JSON or JSONL. Copy files between workspace `cha
 <details>
 <summary><strong>Does this work with VS Code Insiders?</strong></summary>
 
-Yes. Add the `--insiders` flag to any command, e.g., `python3 fix_chat_history.py --insiders --dry-run`.
+Yes. Add the `--insiders` flag to any command, e.g., `vscdb-fix --insiders --dry-run`.
 </details>
 
 <details>
