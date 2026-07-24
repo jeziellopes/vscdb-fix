@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/jeziellopes/vscdb-fix/compare/v1.7.0...v1.7.1) (2026-07-24)
+
+
+### Bug Fixes
+
+* **compact:** add blank line before summary ([b627cc1](https://github.com/jeziellopes/vscdb-fix/commit/b627cc1e9b0f6c696ea3a6e433ec05465058deca))
+
 # [1.7.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.6.0...v1.7.0) (2026-07-24)
 
 
