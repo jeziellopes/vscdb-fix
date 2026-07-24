@@ -63,7 +63,7 @@ Banner requires `figlet` (npm) — auto-detected if available, otherwise shows a
 Or run directly without installing:
 
 ```bash
-python3 fix_chat_history.py --dry-run
+python3 vscdb_fix.py
 ```
 
 ---

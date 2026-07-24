@@ -17,16 +17,16 @@ Solution:
 
 Usage:
     # Auto-repair ALL workspaces
-    python3 fix_chat_history.py
+    python3 vscdb_fix.py
     
     # List workspaces that need repair
-    python3 fix_chat_history.py --list
+    python3 vscdb_fix.py --list
     
     # Repair specific workspace
-    python3 fix_chat_history.py <workspace_id>
+    python3 vscdb_fix.py <workspace_id>
 
     # Merge sessions from duplicate workspace storage folders
-    python3 fix_chat_history.py --merge
+    python3 vscdb_fix.py --merge
 
 Options:
     --list             List workspaces that need repair
@@ -42,31 +42,31 @@ Options:
 
 Examples:
     # Safe preview of what would be fixed
-    python3 fix_chat_history.py --dry-run
+    python3 vscdb_fix.py --dry-run
     
     # Fix everything automatically
-    python3 fix_chat_history.py --yes
+    python3 vscdb_fix.py --yes
     
     # Recover sessions from other workspaces
-    python3 fix_chat_history.py --recover-orphans
+    python3 vscdb_fix.py --recover-orphans
     
     # List workspaces that need repair
-    python3 fix_chat_history.py --list
+    python3 vscdb_fix.py --list
     
     # List all workspaces (including healthy ones)
-    python3 fix_chat_history.py --list --show-all
+    python3 vscdb_fix.py --list --show-all
     
     # Fix specific workspace
-    python3 fix_chat_history.py f4c750964946a489902dcd863d1907de
+    python3 vscdb_fix.py f4c750964946a489902dcd863d1907de
 
     # Remove empty (New Chat) sessions from index and caches
-    python3 fix_chat_history.py --remove-empty
+    python3 vscdb_fix.py --remove-empty
 
     # Use VS Code Insiders instead of regular VS Code
-    python3 fix_chat_history.py --insiders
+    python3 vscdb_fix.py --insiders
 
     # Merge duplicate workspace folders (common after migrating machines)
-    python3 fix_chat_history.py --merge
+    python3 vscdb_fix.py --merge
 
 IMPORTANT: Close VS Code completely before running this script!
 """
@@ -833,10 +833,10 @@ def list_workspaces_mode(show_all: bool = False):
         print(f"📊 Summary: {len(needs_repair)} workspace(s) need repair")
         print()
         print("To repair all workspaces:")
-        print("  python3 fix_chat_history.py")
+        print("  python3 vscdb_fix.py")
         print()
         print("To repair a specific workspace:")
-        print(f"  python3 fix_chat_history.py {needs_repair[0].id}")
+        print(f"  python3 vscdb_fix.py {needs_repair[0].id}")
         print()
     else:
         print("✅ All workspaces are healthy!")
@@ -1005,7 +1005,7 @@ def repair_single_workspace(workspace_id: str, dry_run: bool, remove_orphans: bo
             print()
         else:
             print("To apply these changes, run without --dry-run:")
-            print(f"   python3 fix_chat_history.py {workspace_id}")
+            print(f"   python3 vscdb_fix.py {workspace_id}")
             print()
         
         return 0
@@ -1267,7 +1267,7 @@ def repair_all_workspaces(dry_run: bool, auto_yes: bool, remove_orphans: bool, r
         print()
     else:
         print("To apply these changes, run without --dry-run:")
-        print(f"   python3 fix_chat_history.py")
+        print(f"   python3 vscdb_fix.py")
         print()
 
     return 0 if fail_count == 0 else 1
@@ -1511,7 +1511,7 @@ def merge_workspaces_mode(dry_run: bool = False, auto_yes: bool = False) -> int:
         print()
         print("To apply, run without --dry-run:")
         flag = " --insiders" if _use_insiders else ""
-        print(f"   python3 fix_chat_history.py --merge{flag}")
+        print(f"   python3 vscdb_fix.py --merge{flag}")
         return 0
 
     if not auto_yes:

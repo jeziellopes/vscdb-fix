@@ -16,5 +16,8 @@ classifiers = [
     "Programming Language :: Python :: 3",
 ]
 
+[tool.setuptools]
+py-modules = ["vscdb_fix"]
+
 [project.scripts]
-vscdb-fix = "fix_chat_history:main"
+vscdb-fix = "vscdb_fix:main"
