@@ -17,16 +17,16 @@ Solution:
 
 Usage:
     # Auto-repair ALL workspaces
-    python3 fix_chat_history.py
+    python3 vscdb_fix.py
     
     # List workspaces that need repair
-    python3 fix_chat_history.py --list
+    python3 vscdb_fix.py --list
     
     # Repair specific workspace
-    python3 fix_chat_history.py <workspace_id>
+    python3 vscdb_fix.py <workspace_id>
 
     # Merge sessions from duplicate workspace storage folders
-    python3 fix_chat_history.py --merge
+    python3 vscdb_fix.py --merge
 
 Options:
     --list             List workspaces that need repair
@@ -42,31 +42,31 @@ Options:
 
 Examples:
     # Safe preview of what would be fixed
-    python3 fix_chat_history.py --dry-run
+    python3 vscdb_fix.py --dry-run
     
     # Fix everything automatically
-    python3 fix_chat_history.py --yes
+    python3 vscdb_fix.py --yes
     
     # Recover sessions from other workspaces
-    python3 fix_chat_history.py --recover-orphans
+    python3 vscdb_fix.py --recover-orphans
     
     # List workspaces that need repair
-    python3 fix_chat_history.py --list
+    python3 vscdb_fix.py --list
     
     # List all workspaces (including healthy ones)
-    python3 fix_chat_history.py --list --show-all
+    python3 vscdb_fix.py --list --show-all
     
     # Fix specific workspace
-    python3 fix_chat_history.py f4c750964946a489902dcd863d1907de
+    python3 vscdb_fix.py f4c750964946a489902dcd863d1907de
 
     # Remove empty (New Chat) sessions from index and caches
-    python3 fix_chat_history.py --remove-empty
+    python3 vscdb_fix.py --remove-empty
 
     # Use VS Code Insiders instead of regular VS Code
-    python3 fix_chat_history.py --insiders
+    python3 vscdb_fix.py --insiders
 
     # Merge duplicate workspace folders (common after migrating machines)
-    python3 fix_chat_history.py --merge
+    python3 vscdb_fix.py --merge
 
 IMPORTANT: Close VS Code completely before running this script!
 """
@@ -121,8 +121,19 @@ def extract_project_name(folder_path: Optional[str]) -> Optional[str]:
     except:
         return None
 
+
+def _redact_name(name: str) -> str:
+    """Redact a project name for safe sharing."""
+    import hashlib
+    h = hashlib.md5(name.encode()).hexdigest()[:6]
+    return f"project-{h}"
+
 # Global flag for VS Code Insiders mode
 _use_insiders = False
+# Global flag for compact output
+_compact = False
+# Global flag for redacted output
+_redacted = False
 
 def get_vscode_storage_root() -> Path:
     """Get the VS Code workspace storage directory for the current platform.
@@ -773,14 +784,17 @@ def repair_workspace(workspace: WorkspaceInfo, dry_run: bool = False, show_detai
 
 def list_workspaces_mode(show_all: bool = False):
     """List workspaces with chat sessions."""
-    print()
-    print("=" * 70)
-    if show_all:
-        print("VS Code Workspaces with Chat Sessions")
-    else:
-        print("VS Code Workspaces That Need Repair")
-    print("=" * 70)
-    print()
+    compact = _compact
+
+    if not compact:
+        print()
+        print("=" * 70)
+        if show_all:
+            print("VS Code Workspaces with Chat Sessions")
+        else:
+            print("VS Code Workspaces That Need Repair")
+        print("=" * 70)
+        print()
 
     workspaces = scan_workspaces()
 
@@ -797,50 +811,81 @@ def list_workspaces_mode(show_all: bool = False):
     print(f"Found {len(workspaces)} workspace(s):")
     print()
 
+    compact_data = []
     for i, ws in enumerate(workspaces, 1):
-        status = "⚠️  NEEDS REPAIR" if ws.needs_repair else "✅ HEALTHY"
-        print(f"{i}. {ws.get_display_name()} - {status}")
-        
-        # Show full ID if we have Unknown workspace
-        if not ws.folder and not ws.workspace_file:
-            print(f"   ID: {ws.id}")
-        
-        if ws.folder:
-            print(f"   Folder: {ws.folder}")
-        elif ws.workspace_file:
-            print(f"   Workspace file: {ws.workspace_file}")
-        
-        print(f"   Sessions on disk: {len(ws.sessions_on_disk)}")
-        print(f"   Sessions in index: {len(ws.sessions_in_index)}")
-        if ws.empty_sessions_in_index:
-            print(f"   Sessions empty: {len(ws.empty_sessions_in_index)}")
-        print(f"   Sessions in agent cache: {len(ws.sessions_in_agent_cache)}")
-        
-        if ws.missing_from_index:
-            print(f"   ⚠️  Missing from index: {len(ws.missing_from_index)}")
-        
-        if ws.missing_from_agent_cache:
-            print(f"   ⚠️  Missing from agent cache: {len(ws.missing_from_agent_cache)}")
-        
-        if ws.orphaned_in_index:
-            print(f"   🗑️  Orphaned in index: {len(ws.orphaned_in_index)}")
-        
+        if compact:
+            issues = []
+            if ws.missing_from_index:
+                issues.append(f"missing:{len(ws.missing_from_index)}")
+            if ws.missing_from_agent_cache:
+                issues.append(f"cache:{len(ws.missing_from_agent_cache)}")
+            if ws.orphaned_in_index:
+                issues.append(f"orphans:{len(ws.orphaned_in_index)}")
+            name = extract_project_name(ws.folder or ws.workspace_file) or ws.id[:8]
+            if _redacted:
+                name = _redact_name(name)
+            short_id = ws.id[:8]
+            issues_str = f" ⚠️  {', '.join(issues)}" if issues else ""
+            sessions_str = f"{len(ws.sessions_on_disk)} sessions"
+            compact_data.append((i, name, sessions_str, short_id, issues_str))
+            continue
+
+    # Flush compact output with dynamic padding
+    if compact and compact_data:
+        max_name = max(len(d[1]) for d in compact_data)
+        max_sess = max(len(d[2]) for d in compact_data)
+        num_width = len(str(len(compact_data)))
+        for i, name, sessions_str, short_id, issues_str in compact_data:
+            num = str(i).rjust(num_width)
+            print(f"  {num}. {name.ljust(max_name)} {sessions_str.rjust(max_sess)}  {short_id}{issues_str}")
         print()
+    elif not compact:
+        for i, ws in enumerate(workspaces, 1):
+            status = "⚠️  NEEDS REPAIR" if ws.needs_repair else "✅ HEALTHY"
+            print(f"{i}. {ws.get_display_name()} - {status}")
+            
+            if not ws.folder and not ws.workspace_file:
+                print(f"   ID: {ws.id}")
+            
+            if ws.folder:
+                print(f"   Folder: {ws.folder}")
+            elif ws.workspace_file:
+                print(f"   Workspace file: {ws.workspace_file}")
+            
+            print(f"   Sessions on disk: {len(ws.sessions_on_disk)}")
+            print(f"   Sessions in index: {len(ws.sessions_in_index)}")
+            if ws.empty_sessions_in_index:
+                print(f"   Sessions empty: {len(ws.empty_sessions_in_index)}")
+            print(f"   Sessions in agent cache: {len(ws.sessions_in_agent_cache)}")
+            
+            if ws.missing_from_index:
+                print(f"   ⚠️  Missing from index: {len(ws.missing_from_index)}")
+            
+            if ws.missing_from_agent_cache:
+                print(f"   ⚠️  Missing from agent cache: {len(ws.missing_from_agent_cache)}")
+            
+            if ws.orphaned_in_index:
+                print(f"   🗑️  Orphaned in index: {len(ws.orphaned_in_index)}")
+            
+            print()
 
     needs_repair = [ws for ws in workspaces if ws.needs_repair]
     
     if needs_repair:
         print(f"📊 Summary: {len(needs_repair)} workspace(s) need repair")
         print()
-        print("To repair all workspaces:")
-        print("  python3 fix_chat_history.py")
-        print()
-        print("To repair a specific workspace:")
-        print(f"  python3 fix_chat_history.py {needs_repair[0].id}")
-        print()
+        if not compact:
+            print()
+            print("To repair all workspaces:")
+            print("  vscdb-fix --apply")
+            print()
+            print("To repair a specific workspace:")
+            print(f"  vscdb-fix --apply {needs_repair[0].id}")
+            print()
     else:
         print("✅ All workspaces are healthy!")
-        print()
+        if not compact:
+            print()
 
     return 0
 
@@ -1005,7 +1050,7 @@ def repair_single_workspace(workspace_id: str, dry_run: bool, remove_orphans: bo
             print()
         else:
             print("To apply these changes, run without --dry-run:")
-            print(f"   python3 fix_chat_history.py {workspace_id}")
+            print(f"   python3 vscdb_fix.py {workspace_id}")
             print()
         
         return 0
@@ -1267,7 +1312,7 @@ def repair_all_workspaces(dry_run: bool, auto_yes: bool, remove_orphans: bool, r
         print()
     else:
         print("To apply these changes, run without --dry-run:")
-        print(f"   python3 fix_chat_history.py")
+        print(f"   python3 vscdb_fix.py")
         print()
 
     return 0 if fail_count == 0 else 1
@@ -1511,7 +1556,7 @@ def merge_workspaces_mode(dry_run: bool = False, auto_yes: bool = False) -> int:
         print()
         print("To apply, run without --dry-run:")
         flag = " --insiders" if _use_insiders else ""
-        print(f"   python3 fix_chat_history.py --merge{flag}")
+        print(f"   python3 vscdb_fix.py --merge{flag}")
         return 0
 
     if not auto_yes:
@@ -1556,43 +1601,127 @@ def merge_workspaces_mode(dry_run: bool = False, auto_yes: bool = False) -> int:
     return 0
 
 
+def _show_banner():
+    """Print figlet-style banner using figlet.js (ANSI Shadow font) in VS Code blue."""
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["npx", "--yes", "figlet", "-f", "ANSI Shadow", "VSCDB-FIX"],
+            capture_output=True, text=True, timeout=30,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            blue = "\033[38;5;33m"
+            reset = "\033[0m"
+            print()
+            for line in result.stdout.splitlines():
+                print(f"  {blue}{line}{reset}")
+            print(f"  {blue}  Repair corrupted chat session indices in VS Code{reset}")
+            print()
+            return
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        pass
+    print("=" * 50)
+    print("  vscdb-fix — VS Code Chat History Repair")
+    print("=" * 50)
+    print()
+
+
 def main():
-    global _use_insiders
+    global _use_insiders, _compact, _redacted
 
-    # Parse flags
-    dry_run = '--dry-run' in sys.argv
-    auto_yes = '--yes' in sys.argv
-    remove_orphans = '--remove-orphans' in sys.argv
-    remove_empty = '--remove-empty' in sys.argv
-    recover_orphans = '--recover-orphans' in sys.argv
-    list_mode = '--list' in sys.argv
-    show_all = '--show-all' in sys.argv
-    merge_mode = '--merge' in sys.argv
-    show_help = '--help' in sys.argv or '-h' in sys.argv
-    _use_insiders = '--insiders' in sys.argv
+    import argparse
 
-    if show_help:
-        print(__doc__)
-        return 0
+    parser = argparse.ArgumentParser(
+        prog="vscdb-fix",
+        description="Repair corrupted chat session indices in VS Code workspace storage databases.",
+        epilog="IMPORTANT: Close VS Code completely before running repairs!",
+    )
+
+    parser.add_argument(
+        "workspace_id",
+        nargs="?",
+        default=None,
+        help="Repair a specific workspace by ID",
+    )
+    parser.add_argument(
+        "--list",
+        action="store_true",
+        help="List workspaces that need repair",
+    )
+    parser.add_argument(
+        "--show-all",
+        action="store_true",
+        help="With --list, show all workspaces including healthy ones",
+    )
+    parser.add_argument(
+        "--apply",
+        action="store_true",
+        help="Actually apply repairs (default: dry-run preview only)",
+    )
+    parser.add_argument(
+        "-y", "--yes",
+        action="store_true",
+        help="Skip confirmation prompts",
+    )
+    parser.add_argument(
+        "--remove-orphans",
+        action="store_true",
+        help="Remove orphaned index entries (default: keep them)",
+    )
+    parser.add_argument(
+        "--remove-empty",
+        action="store_true",
+        help="Remove empty sessions (no requests) from index and caches",
+    )
+    parser.add_argument(
+        "--recover-orphans",
+        action="store_true",
+        help="Copy orphaned sessions from other workspaces",
+    )
+    parser.add_argument(
+        "--merge",
+        action="store_true",
+        help="Merge sessions from duplicate workspace folders",
+    )
+    parser.add_argument(
+        "--insiders",
+        action="store_true",
+        help="Use VS Code Insiders storage instead of regular VS Code",
+    )
+    parser.add_argument(
+        "--compact",
+        action="store_true",
+        help="Minimal output (no banner, fewer blank lines)",
+    )
+    parser.add_argument(
+        "--redacted",
+        action="store_true",
+        help="Redact project names for safe sharing",
+    )
+
+    _show_banner()
+
+    args = parser.parse_args()
+    _use_insiders = args.insiders
+    _compact = args.compact
+    _redacted = args.redacted
+    dry_run = not args.apply
 
     # List mode
-    if list_mode:
-        return list_workspaces_mode(show_all=show_all)
+    if args.list:
+        return list_workspaces_mode(show_all=args.show_all)
 
-    # Merge mode - merge sessions from duplicate workspace storage folders
-    if merge_mode:
-        return merge_workspaces_mode(dry_run, auto_yes)
-
-    # Find first non-flag argument to use as workspace id
-    workspace_id = None
-    for arg in sys.argv[1:]:
-        if not arg.startswith('-'):
-            workspace_id = arg
-            break
+    # Merge mode
+    if args.merge:
+        return merge_workspaces_mode(dry_run, args.yes)
 
     # Single workspace mode
-    if workspace_id:
-        if not dry_run and not auto_yes:
+    if args.workspace_id:
+        if dry_run and not args.yes:
+            print("🔍 DRY RUN — no changes will be made.")
+            print()
+
+        if not dry_run and not args.yes:
             print("⚠️  IMPORTANT: Please close VS Code completely before continuing!")
             print()
             response = input("Have you closed VS Code? (yes/no): ").strip().lower()
@@ -1602,10 +1731,17 @@ def main():
                 return 1
             print()
 
-        return repair_single_workspace(workspace_id, dry_run, remove_orphans, recover_orphans, auto_yes, remove_empty)
+        return repair_single_workspace(
+            args.workspace_id, dry_run, args.remove_orphans,
+            args.recover_orphans, args.yes, args.remove_empty,
+        )
 
     # Auto-repair all workspaces mode (default)
-    if not dry_run and not auto_yes:
+    if dry_run and not args.yes:
+        print("🔍 DRY RUN — no changes will be made.")
+        print()
+
+    if not dry_run and not args.yes:
         print()
         print("⚠️  IMPORTANT: Please close VS Code completely before continuing!")
         print()
@@ -1615,7 +1751,10 @@ def main():
             print("❌ Aborted. Please close VS Code and run this script again.")
             return 1
 
-    return repair_all_workspaces(dry_run, auto_yes, remove_orphans, recover_orphans, remove_empty)
+    return repair_all_workspaces(
+        dry_run, args.yes, args.remove_orphans,
+        args.recover_orphans, args.remove_empty,
+    )
 
 if __name__ == "__main__":
     exit_code = main()

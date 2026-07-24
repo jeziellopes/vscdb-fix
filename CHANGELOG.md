@@ -1,3 +1,74 @@
+# [1.8.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.7.1...v1.8.0) (2026-07-24)
+
+
+### Features
+
+* add --redacted flag to redact project names for safe sharing ([c3e0dc8](https://github.com/jeziellopes/vscdb-fix/commit/c3e0dc80536b5759d9533d1932815887c6f62a60))
+
+## [1.7.1](https://github.com/jeziellopes/vscdb-fix/compare/v1.7.0...v1.7.1) (2026-07-24)
+
+
+### Bug Fixes
+
+* **compact:** add blank line before summary ([b627cc1](https://github.com/jeziellopes/vscdb-fix/commit/b627cc1e9b0f6c696ea3a6e433ec05465058deca))
+
+# [1.7.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.6.0...v1.7.0) (2026-07-24)
+
+
+### Features
+
+* **compact:** dynamic column padding, project name, short ID ([e197ead](https://github.com/jeziellopes/vscdb-fix/commit/e197ead87f9d0aa6ffbaaf2b991fcaae75515e2c))
+
+# [1.6.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.5.0...v1.6.0) (2026-07-24)
+
+
+### Features
+
+* --compact shows one-liner per workspace (407 → 49 lines) ([e12393a](https://github.com/jeziellopes/vscdb-fix/commit/e12393a7843db59a3009adbefcbd4109ccb10a6d))
+
+# [1.5.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.4.1...v1.5.0) (2026-07-24)
+
+
+### Features
+
+* add --compact flag and padding to banner ([80fa044](https://github.com/jeziellopes/vscdb-fix/commit/80fa04459b442c557679c17186e213fbbffe3d68))
+
+## [1.4.1](https://github.com/jeziellopes/vscdb-fix/compare/v1.4.0...v1.4.1) (2026-07-24)
+
+
+### Bug Fixes
+
+* show banner before argparse so --help displays it too ([62bb73d](https://github.com/jeziellopes/vscdb-fix/commit/62bb73d8ec42f145707f6ccc1c50bb2a439f3cb4))
+
+# [1.4.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.3.0...v1.4.0) (2026-07-24)
+
+
+### Features
+
+* dry-run is now the default, use --apply to actually repair ([10d0a58](https://github.com/jeziellopes/vscdb-fix/commit/10d0a58e63221478e07333a1f5406f5039a4e10d))
+
+# [1.3.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.2.0...v1.3.0) (2026-07-24)
+
+
+### Features
+
+* add figlet banner with pyfiglet (optional) ([bc78f32](https://github.com/jeziellopes/vscdb-fix/commit/bc78f3227840314d9f962014a3d414bdd9a52b17))
+
+# [1.2.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.1.0...v1.2.0) (2026-07-24)
+
+
+### Features
+
+* convert to proper CLI tool with argparse and pyproject.toml ([468eb16](https://github.com/jeziellopes/vscdb-fix/commit/468eb162652fec4906d93014e35b7f3bf491103a))
+
+# [1.1.0](https://github.com/jeziellopes/vscdb-fix/compare/v1.0.0...v1.1.0) (2026-03-02)
+
+
+### Features
+
+* **command:** list only workspaces needing repair as default, add --show-all option ([3f26dd7](https://github.com/jeziellopes/vscdb-fix/commit/3f26dd7b4986cd0bd2d4825a209fb752fd080649))
+* **workspace:** add option to remove empty sessions from index ([f73140c](https://github.com/jeziellopes/vscdb-fix/commit/f73140c8ca021a976f0b8525a896c1b3882241f7))
+
 # 1.0.0 (2026-02-28)
 
 
