@@ -10,7 +10,7 @@ A utility to repair corrupted chat session indices in VS Code workspace storage 
 
 ## Project Status
 
-**This project is in maintenance mode.** It works as-is for its current feature set, but I am no longer actively using GitHub Copilot or VS Code Chat — I canceled my subscription after spending too much time trying to improve closed-source projects through the AI usage layer. Without daily use, I can't reliably test new scenarios or reproduce regressions.
+**This project is no longer actively developed.** It works as-is for its current feature set, but I am no longer using GitHub Copilot or VS Code Chat — I canceled my subscription after spending too much time trying to improve closed-source projects through the AI usage layer. Without daily use, I can't reliably test new scenarios or reproduce regressions.
 
 **If you need this project to stay active**, consider sponsoring. Funding is the only path that would get me back into active development — I have several other projects competing for my time right now. Sponsorship would fund:
 
