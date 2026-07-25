@@ -9,9 +9,9 @@ A utility to repair corrupted chat session indices in VS Code workspace storage 
 
 ## 🚧 Project Status
 
-**This project is no longer actively developed.** It works as-is for its current feature set, but I am no longer using GitHub Copilot or VS Code Chat — I canceled my subscription after spending too much time trying to improve closed-source projects through the AI usage layer. Without daily use, I can't reliably test new scenarios or reproduce regressions.
+**This project is no longer actively developed.** It works as-is for its current feature set, but I'm no longer using GitHub Copilot or VS Code Chat. Without daily use, I can't reliably test new scenarios or reproduce regressions.
 
-**If you need this project to stay active**, consider sponsoring. Funding is the only path that would get me back into active development — I have several other projects competing for my time right now. Sponsorship would fund:
+**If you need this project to stay active**, consider [sponsoring](https://github.com/sponsors/jeziellopes). Funding is the only path that would get me back into active development — I have several other projects competing for my time right now. Sponsorship would fund:
 
 - Investigating and fixing upstream VS Code issues (like [#15](https://github.com/jeziellopes/vscdb-fix/issues/15) — session repairs reverted on shutdown)
 - Packaging as a VS Code extension for in-editor use
@@ -50,8 +50,6 @@ vscdb-fix              # preview (dry-run by default)
 vscdb-fix --apply      # actually fix (close VS Code first!)
 vscdb-fix --apply --yes
 ```
-
-Banner requires `figlet` (npm) — auto-detected if available, otherwise shows a simple header.
 
 Or run directly without installing:
 
@@ -242,7 +240,7 @@ This is a VS Code core bug, not a GitHub Copilot extension issue. The Copilot ex
 
 Bug reports and improvements welcome via issues or pull requests.
 
-If you'd like to see active development on this project, consider sponsoring — it's the most direct way to fund the time needed for upstream investigation and VS Code extension development.
+If you'd like to see active development on this project, consider [sponsoring](https://github.com/sponsors/jeziellopes) — it's the most direct way to fund the time needed for upstream investigation and VS Code extension development.
 
 ## 📄 License
 
