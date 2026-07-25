@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vscdb-fix"
-version = "1.1.0"
+version = "1.8.0"
 description = "Repair corrupted chat session indices in VS Code workspace storage databases"
 readme = "README.md"
 license = {text = "MIT"}
